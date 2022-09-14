@@ -5,6 +5,7 @@ import com.example.quartjob.service.TaskDefinitionBean;
 import com.example.quartjob.service.TaskSchedulingService;
 import com.example.quartjob.utils.UuidGenerator;
 import lombok.Data;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -21,13 +22,15 @@ public class JobController {
     private final TaskDefinitionBean taskDefinitionBean;
 
     @PostMapping(path="/taskdef", consumes = "application/json", produces="application/json")
-    public void scheduleATask(@RequestBody TaskDefinition taskDefinition) {
+    public ResponseEntity<String> scheduleATask(@RequestBody TaskDefinition taskDefinition) {
+        String jobId = UuidGenerator.generateUuid();
         taskDefinitionBean.setTaskDefinition(taskDefinition);
-        taskSchedulingService.scheduleATask(UuidGenerator.generateUuid(), taskDefinitionBean, taskDefinition.getCronExpression());
+        taskSchedulingService.scheduleATask(jobId, taskDefinitionBean, taskDefinition.getCronExpression());
+        return ResponseEntity.ok(jobId);
     }
 
     @GetMapping(path="/remove/{jobid}")
-    public void removeJob(@PathVariable String jobid) {
-        taskSchedulingService.removeScheduledTask(jobid);
+    public void removeJob(@PathVariable String jobId) {
+        taskSchedulingService.removeScheduledTask(jobId);
     }
 }
